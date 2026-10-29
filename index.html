@@ -1,0 +1,623 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Para Ariana 💌</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: Georgia, serif;
+    color: #5a2a3c;
+    background: linear-gradient(160deg, #ffe3ec, #fff3e6 60%, #ffd9e6);
+    padding: 30px 16px 60px;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    color: #c2185b;
+  }
+
+  .sub {
+    text-align: center;
+    margin: 8px 0 0;
+    font-style: italic;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    padding: 0 8px;
+  }
+
+  /* Más separación entre el mensaje y los sobres */
+  .grid {
+    max-width: 980px;
+    margin: auto;
+    padding-top: 125px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 45px 24px;
+  }
+
+  /* Sobre */
+  .env {
+    position: relative;
+    height: 150px;
+    cursor: pointer;
+    perspective: 600px;
+    transition: transform 0.2s;
+    isolation: isolate;
+  }
+
+  .env:hover {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+
+  /* Papel interior */
+  .paper {
+    position: absolute;
+    left: 12%;
+    width: 76%;
+    height: 110px;
+    top: 14px;
+    background: #fffdf7;
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    transform: translateY(0);
+    transition:
+      transform 0.6s 0.2s,
+      z-index 0s 0.8s;
+  }
+
+  /* Parte frontal del sobre */
+  .body {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(194, 24, 91, 0.25);
+    overflow: hidden;
+    z-index: 2;
+  }
+
+  .body::before,
+  .body::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 50%;
+    height: 100%;
+  }
+
+  .body::before {
+    left: 0;
+    background: linear-gradient(to top right, #ffd0df 49.5%, transparent 50%);
+  }
+
+  .body::after {
+    right: 0;
+    background: linear-gradient(to top left, #ffc2d6 49.5%, transparent 50%);
+  }
+
+  /* Solapa */
+  .flap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 75px;
+    background: #ff9fbd;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top;
+    transition: transform 0.6s, z-index 0s 0.3s;
+    z-index: 5;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .seal {
+    position: absolute;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    font-size: 1.6rem;
+    transition: opacity 0.3s;
+  }
+
+  .name {
+    position: absolute;
+    bottom: 14px;
+    width: 100%;
+    text-align: center;
+    z-index: 4;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #8e2250;
+    pointer-events: none;
+  }
+
+  /* La carta sale hacia arriba del sobre */
+  .env.open .paper {
+    z-index: 3;
+    transform: translateY(-95px);
+    transition:
+      transform 0.6s 0.2s,
+      z-index 0s 0.2s;
+  }
+
+  .env.open .flap {
+    transform: rotateX(180deg);
+    z-index: 0;
+  }
+
+  .env.open .seal {
+    opacity: 0;
+  }
+
+  /* Ventana de la carta */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(90, 20, 50, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 100;
+  }
+
+  .modal.show {
+    display: flex;
+  }
+
+  .letter {
+    background:
+      repeating-linear-gradient(
+        transparent 0 29px,
+        #f4d6df 29px 30px
+      ),
+      #fffdf7;
+    max-width: 480px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: auto;
+    padding: 30px 28px;
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    animation: up 0.5s ease;
+    position: relative;
+  }
+
+  @keyframes up {
+    from {
+      transform: translateY(60px) scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  .letter h2 {
+    color: #c2185b;
+    margin-bottom: 12px;
+  }
+
+  .letter p {
+    line-height: 30px;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  .from {
+    margin-top: 16px;
+    text-align: right;
+    font-style: italic;
+    font-weight: bold;
+  }
+
+  .x {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    border: 0;
+    background: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #c2185b;
+  }
+
+  .x:hover {
+    color: #8e2250;
+  }
+
+  /* Corazones y flores flotantes */
+  .heart {
+    position: fixed;
+    bottom: -30px;
+    font-size: 1.4rem;
+    opacity: 0.7;
+    animation: float linear forwards;
+    pointer-events: none;
+    z-index: 200;
+  }
+
+  @keyframes float {
+    to {
+      transform: translateY(-110vh) rotate(40deg);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 500px) {
+    body {
+      padding: 24px 16px 40px;
+    }
+
+    .grid {
+      padding-top: 105px;
+      gap: 45px;
+    }
+
+    .letter {
+      padding: 30px 22px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .env,
+    .flap,
+    .seal,
+    .paper {
+      transition-duration: 0.01ms;
+    }
+
+    .letter {
+      animation: none;
+    }
+  }
+  
+/* Fondo animado de celebración */
+#decoracion {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+  isolation: isolate;
+}
+
+.decoracion-item {
+  position: absolute;
+  bottom: -70px;
+  left: 0;
+  font-size: 28px;
+  opacity: 0;
+  animation: flotar linear infinite;
+  will-change: transform, opacity;
+  user-select: none;
+}
+
+@keyframes flotar {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translate3d(25px, -55vh, 0) rotate(18deg);
+    opacity: 0.65;
+  }
+
+  90% {
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translate3d(-20px, -115vh, 0) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+/* En móviles, los elementos decorativos son más pequeños */
+@media (max-width: 500px) {
+  .decoracion-item {
+    font-size: 22px;
+  }
+}
+
+/* Respetar a quienes prefieren menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .decoracion-item {
+    animation: none;
+    display: none;
+  }
+}
+
+/* Detalle final para Ariana */
+.detalle-final {
+  max-width: 720px;
+  margin: 100px auto 20px;
+  padding: 32px 22px;
+  text-align: center;
+  background: rgba(255, 253, 247, 0.78);
+  border: 1px solid rgba(194, 24, 91, 0.16);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(194, 24, 91, 0.12);
+  position: relative;
+  z-index: 1;
+}
+
+.detalle-final p {
+  color: #8e2250;
+  font-size: clamp(1.05rem, 3vw, 1.3rem);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.boton-detalle {
+  display: inline-block;
+  padding: 13px 26px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e75480, #c2185b);
+  color: white;
+  font-family: Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 6px 16px rgba(194, 24, 91, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.boton-detalle:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(194, 24, 91, 0.3);
+}
+
+@media (max-width: 500px) {
+  .detalle-final {
+    margin-top: 75px;
+    padding: 26px 18px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="decoracion" aria-hidden="true"></div>
+
+<h1>Para Ariana 💖</h1>
+
+<p class="sub">
+  Tus amigos te escribieron algo especial.
+  Toca cada carta para abrirla.
+</p>
+
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="modal">
+  <div class="letter">
+    <button class="x" id="close" aria-label="Cerrar carta">×</button>
+    <h2>Querida Ariana,</h2>
+    <p id="msg"></p>
+    <div class="from" id="from"></div>
+  </div>
+</div>
+
+<section class="detalle-final">
+  <p>
+    Y antes de terminar... 💗<br>
+    Un ultimo detalle antes de que cierres la pagina
+  </p>
+
+  <a class="boton-detalle" href="flower.html">
+    Ver tu detalle especial 🌷
+  </a>
+</section>
+
+<script>
+const cartas = [
+  {
+    nombre: "Estrella",
+    mensaje: "Ariana, feliz cumpleaños. Sabes que te quiero mucho y deseo que siempre, siempre seas feliz, que logres todas tus metas y que Dios te cuide para que sigas siendo mi amiga por siempre. 🤍"
+  },
+  {
+    nombre: "Stefano",
+    mensaje: "Feliz cumpleaños arianaaaa, que la estés pasando muy bonito junto a las personas que más quieres Papito Dios te cuide y cumplas todas tus metas que te propongas Te deseo lo mejor y te mando un fuerte abrazo 🫂"
+  },
+  {
+    nombre: "Jahir",
+    mensaje: "¡Feliz cumpleaños, Arianaaaa! Hoy celebro no solo tu vida, sino la bonita y sincera amistad que tenemos la suerte de compartir. Deseo de corazón que este nuevo año llegue cargado de risas, éxitos y momentos inolvidables para ti. Gracias por estar siempre, por tu buena vibra y tu valiosa compañía ¡Disfruta muchísimo tu día, un abrazo a la distancia!"
+  },
+  {
+    nombre: "Warmi",
+    mensaje: "Woof Woof"
+  },
+  {
+    nombre: "Tita",
+    mensaje: "Pollito"
+  }
+  
+,
+  {
+    nombre: "Walter",
+    mensaje: "Feliz cumple, Arianaaa. Espero que hoy la pases muy bonito y que tus 22 vengan con muchas cosas lindas. Nunca dudes de ti ni de todo lo que eres capaz de lograr, incluso cuando las cosas se pongan difíciles. Ojalá este año te regale momentos que te hagan muy feliz y que siempre tengas motivos para sonreír. Te mereces cosas muy bonitas, de verdad"
+  },
+  {
+    nombre: "Brian",
+    mensaje: "Arianaaa, feliz cumpleaños. Espero que este dia la pases muy bien junto a toda tu familia y todas las personas que te quieren. Me siento muy agradecido de haber podido compartir contigo esta amistad de ya muchos años (y los que faltan). Estoy seguro de que este año podras cumplir todos tus sueños, todo lo que te vayas a proponer hacer, y que sobre todo sigan llegando las mismas risas y momentos increíbles junto a todos nosotros!. Te diría que pese a todo lo malo que vaya a pasar no te rindas, pero te conozco y se que nada en este mundo podrá tumbarte porque eres una persona muy fuerte aunque a veces dudes de ti misma. Pasala increíble hoy y no tomes mucho (aunque conociéndote sera difícil)🎉🎉"
+  },
+  {
+    nombre: "Amir",
+    mensaje: "Feliz cumpleaños mi querida robamaridos! Te mando un abrazo enorme. Ya sé que te robaste a mi bizcochito de chocolate, pero no soy celoso, así que te lo presto hoy para que lo festejes como se debe., asi que nada, pasalo dptm y que tengas un feliz cum"
+  },
+  {
+    nombre: "Lucia",
+    mensaje: "Querida hermanita, no hay palabras para describir el amor que siento por ti, eres mi hermanita favorita, pero no le digas a nadie si? Siempre te veré con la carita de bebé, a la bebita que siempre protejo, nunca te rindas en este camino, te parecerá difícil, pero con la mano de Dios lo vas a lograr y saldrás triunfadora 🤍"
+  },
+  {
+    nombre: "Carmen",
+    mensaje: "Mi niña hermosa, feliz cumpleaños. ❤️ Te amo muchísimo, hijita. Me siento muy orgullosa de ti, de tu esfuerzo y de tu dedicación. Cada vez que te veo madrugar, alistarte e irte a trabajar, admiro más a la mujer en la que te estás convirtiendo. Veo en ti a una gran profesional, que poco a poco va construyendo su camino con esfuerzo y responsabilidad. Deseo de todo corazón que la vida te dé muchas oportunidades para cumplir tus sueños y que nunca te falten fuerzas para seguir adelante. Siempre voy a querer lo mejor para ti y voy a estar deseando verte feliz. Nunca olvides lo valiosa que eres y cuánto te amo, mi hijita hermosa. ❤️"
+  }
+];
+
+const grid = document.getElementById("grid");
+const modal = document.getElementById("modal");
+const msg = document.getElementById("msg");
+const from = document.getElementById("from");
+const closeBtn = document.getElementById("close");
+
+let sobreActual = null;
+let temporizadorApertura = null;
+
+cartas.forEach(c => {
+  const e = document.createElement("div");
+  e.className = "env";
+
+  const paper = document.createElement("div");
+  paper.className = "paper";
+
+  const body = document.createElement("div");
+  body.className = "body";
+
+  const flap = document.createElement("div");
+  flap.className = "flap";
+
+  const seal = document.createElement("div");
+  seal.className = "seal";
+  seal.textContent = "💌";
+
+  const name = document.createElement("div");
+  name.className = "name";
+  name.textContent = c.nombre;
+
+  e.append(paper, body, flap, seal, name);
+
+  e.setAttribute("role", "button");
+  e.setAttribute("tabindex", "0");
+  e.setAttribute("aria-label", "Abrir la carta de " + c.nombre);
+
+  function abrirCarta() {
+    if (modal.classList.contains("show") || sobreActual) return;
+
+    sobreActual = e;
+    e.classList.add("open");
+
+    temporizadorApertura = setTimeout(() => {
+      msg.textContent = c.mensaje;
+      from.textContent = "Con cariño, " + c.nombre + " 💕";
+      modal.classList.add("show");
+      closeBtn.focus();
+      lluvia();
+    }, 750);
+  }
+
+  e.addEventListener("click", abrirCarta);
+
+  e.addEventListener("keydown", ev => {
+    if (ev.key === "Enter" || ev.key === " ") {
+      ev.preventDefault();
+      abrirCarta();
+    }
+  });
+
+  grid.appendChild(e);
+});
+
+function cerrarCarta() {
+  clearTimeout(temporizadorApertura);
+  modal.classList.remove("show");
+
+  if (sobreActual) {
+    sobreActual.classList.remove("open");
+    sobreActual = null;
+  }
+}
+
+closeBtn.addEventListener("click", cerrarCarta);
+
+modal.addEventListener("click", ev => {
+  if (ev.target === modal) {
+    cerrarCarta();
+  }
+});
+
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape" && modal.classList.contains("show")) {
+    cerrarCarta();
+  }
+});
+
+function lluvia() {
+  for (let i = 0; i < 14; i++) {
+    const h = document.createElement("div");
+
+    h.className = "heart";
+    h.textContent = ["💖", "💕", "💗", "🌸"][i % 4];
+    h.style.left = Math.random() * 100 + "vw";
+    h.style.animationDuration = (3 + Math.random() * 3) + "s";
+
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 6500);
+  }
+}
+
+/* Emojis flotantes de celebración */
+(function crearDecoracion() {
+  const fondo = document.getElementById("decoracion");
+
+  if (!fondo) return;
+
+  const emojis = [
+    "💗", "💕", "💖", "💝", "❤️",
+    "🧁", "🎂", "🎉", "🥳", "🎀",
+    "🌸", "🌷", "✨", "🎈"
+  ];
+
+  // Cantidad de elementos flotantes simultáneos
+  const cantidad = window.innerWidth < 500 ? 13 : 22;
+
+  for (let i = 0; i < cantidad; i++) {
+    const elemento = document.createElement("span");
+
+    elemento.className = "decoracion-item";
+    elemento.textContent =
+      emojis[Math.floor(Math.random() * emojis.length)];
+
+    // Posición horizontal aleatoria
+    elemento.style.left = Math.random() * 100 + "%";
+
+    // Cada emoji tiene un tamaño ligeramente distinto
+    elemento.style.fontSize = (20 + Math.random() * 18) + "px";
+
+    // Movimiento lento y variado
+    elemento.style.animationDuration = (12 + Math.random() * 15) + "s";
+
+    // Desfase para que no suban todos al mismo tiempo
+    elemento.style.animationDelay = (-Math.random() * 25) + "s";
+
+    fondo.appendChild(elemento);
+  }
+})();
+
+</script>
+
+</body>
+</html>
